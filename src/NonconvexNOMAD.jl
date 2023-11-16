@@ -14,7 +14,7 @@ struct NOMADAlg <: AbstractOptimizer
 end
 NOMADAlg() = NOMADAlg(:explicit) # :progressive, :custom
 
-struct NOMADOptions{N <: NamedTuple}
+struct NOMADOptions{N<:NamedTuple}
     nt::N
 end
 
@@ -51,7 +51,8 @@ function NOMADOptions(;
     )
 end
 
-mutable struct NOMADWorkspace{M <: VecModel, X <: AbstractVector, O <: NOMADOptions, A <: NOMADAlg} <: Workspace
+mutable struct NOMADWorkspace{M<:VecModel,X<:AbstractVector,O<:NOMADOptions,A<:NOMADAlg} <:
+               Workspace
     model::M
     x0::X
     options::O
@@ -66,7 +67,7 @@ function NOMADWorkspace(
 )
     return NOMADWorkspace(model, copy(x0), options, optimizer)
 end
-struct NOMADResult{M1, M2, R, A, O} <: AbstractResult
+struct NOMADResult{M1,M2,R,A,O} <: AbstractResult
     minimizer::M1
     minimum::M2
     result::R
@@ -172,7 +173,7 @@ function optimize!(workspace::NOMADWorkspace)
         x -> begin
             try
                 if length(model.ineq_constraints.fs) > 0
-                    out = [finite_or_inf(obj(x)); finite_or_inf.(model.ineq_constraints(x))]
+                    out = [finite_or_inf(obj(x)) finite_or_inf.(model.ineq_constraints(x))]
                 else
                     out = [finite_or_inf(obj(x))]
                 end
