@@ -4,7 +4,7 @@ export NOMADAlg, NOMADOptions
 
 using Reexport, Parameters, Zygote
 @reexport using NonconvexCore
-using NonconvexCore: @params, VecModel, AbstractResult
+using NonconvexCore: VecModel, AbstractResult
 using NonconvexCore: AbstractOptimizer, CountingFunction
 import NonconvexCore: optimize, optimize!, Workspace
 import NOMAD: NOMAD
@@ -14,8 +14,8 @@ struct NOMADAlg <: AbstractOptimizer
 end
 NOMADAlg() = NOMADAlg(:explicit) # :progressive, :custom
 
-@params struct NOMADOptions
-    nt::NamedTuple
+struct NOMADOptions{N <: NamedTuple}
+    nt::N
 end
 
 #= Other options include:
@@ -51,11 +51,11 @@ function NOMADOptions(;
     )
 end
 
-@params mutable struct NOMADWorkspace <: Workspace
-    model::VecModel
-    x0::AbstractVector
-    options::NOMADOptions
-    alg::NOMADAlg
+mutable struct NOMADWorkspace{M <: VecModel, X <: AbstractVector, O <: NOMADOptions, A <: NOMADAlg} <: Workspace
+    model::M
+    x0::X
+    options::O
+    alg::A
 end
 function NOMADWorkspace(
     model::VecModel,
@@ -66,12 +66,12 @@ function NOMADWorkspace(
 )
     return NOMADWorkspace(model, copy(x0), options, optimizer)
 end
-@params struct NOMADResult <: AbstractResult
-    minimizer::Any
-    minimum::Any
-    result::Any
-    alg::Any
-    options::Any
+struct NOMADResult{M1, M2, R, A, O} <: AbstractResult
+    minimizer::M1
+    minimum::M2
+    result::R
+    alg::A
+    options::O
 end
 
 function NonconvexCore._optimize_precheck(
@@ -172,12 +172,15 @@ function optimize!(workspace::NOMADWorkspace)
         x -> begin
             try
                 if length(model.ineq_constraints.fs) > 0
-                    out = [finite_or_inf(obj(x)) finite_or_inf.(model.ineq_constraints(x))]
+                    out = [finite_or_inf(obj(x)); finite_or_inf.(model.ineq_constraints(x))]
                 else
                     out = [finite_or_inf(obj(x))]
                 end
                 return (true, true, out)
-            catch
+            catch err
+                if !(err isa DomainError)
+                    rethrow(err)
+                end
                 out = fill(Inf, nb_outputs)
                 return (false, true, out)
             end
