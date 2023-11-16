@@ -173,7 +173,7 @@ function optimize!(workspace::NOMADWorkspace)
         x -> begin
             try
                 if length(model.ineq_constraints.fs) > 0
-                    out = [finite_or_inf(obj(x)) finite_or_inf.(model.ineq_constraints(x))]
+                    out = [finite_or_inf(obj(x)); finite_or_inf.(model.ineq_constraints(x))]
                 else
                     out = [finite_or_inf(obj(x))]
                 end
