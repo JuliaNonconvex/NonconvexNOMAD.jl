@@ -1,6 +1,6 @@
 # NonconvexNOMAD
 
-[![Build Status](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/workflows/CI/badge.svg)](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/actions)
+[![Build Status](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/actions)
 [![Coverage](https://codecov.io/gh/JuliaNonconvex/NonconvexNOMAD.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaNonconvex/NonconvexNOMAD.jl)
 
 
