@@ -113,3 +113,31 @@ x0 = [0.5, 2.3]
         @test norm(r.minimizer - [1 / 3, 8 / 27]) < 1e-6
     end
 end
+
+@testset "Equality constraint handling" begin
+    # Regression test: equality constraints used to be silently dropped when
+    # optimize was called without an options kwarg.
+    m = Model(f)
+    addvar!(m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(m, x -> g(x, 2, 0))
+    add_eq_constraint!(m, x -> sum(x) - 1 / 3 - 8 / 27)
+    @test_throws ArgumentError NonconvexNOMAD.optimize(m, NOMADAlg(), x0)
+
+    # linear_equality_constraints = true without equality constraints gives a
+    # descriptive error, not an AssertionError.
+    m2 = Model(f)
+    addvar!(m2, [0.0, 0.0], [10.0, 10.0])
+    @test_throws ArgumentError NonconvexNOMAD.optimize(
+        m2,
+        NOMADAlg(),
+        x0,
+        options = NOMADOptions(linear_equality_constraints = true),
+    )
+end
+
+@testset "finite_or_inf" begin
+    @test NonconvexNOMAD.finite_or_inf(NaN) == Inf
+    @test NonconvexNOMAD.finite_or_inf(-Inf) == -Inf
+    @test NonconvexNOMAD.finite_or_inf(Inf) == Inf
+    @test NonconvexNOMAD.finite_or_inf(1.5) == 1.5
+end
