@@ -79,7 +79,7 @@ function NonconvexCore._optimize_precheck(
     model::NonconvexCore.AbstractModel,
     ::NOMADAlg,
     x0;
-    options,
+    options = NOMADOptions(),
 )
     length(model.eq_constraints.fs) == 0 ||
         options.nt.linear_equality_constraints ||
@@ -101,17 +101,26 @@ end
     return :(NamedTuple{$ns}(nt))
 end
 
-finite_or_inf(x::T) where {T} = isfinite(x) ? x : convert(T, Inf)
+finite_or_inf(x::T) where {T} = isnan(x) ? convert(T, Inf) : x
 
 function optimize!(workspace::NOMADWorkspace)
     @unpack model, options, x0, alg = workspace
     if options.nt.linear_equality_constraints
-        @assert length(model.eq_constraints.fs) > 0
+        length(model.eq_constraints.fs) > 0 || throw(
+            ArgumentError(
+                "The `linear_equality_constraints` option is true but the model has no equality constraints.",
+            ),
+        )
         A = Zygote.jacobian(model.eq_constraints, x0)[1]
         b = -model.eq_constraints(zeros(length(x0)))
     else
         A = nothing
         b = nothing
+        length(model.eq_constraints.fs) == 0 || throw(
+            ArgumentError(
+                "NOMAD does not support nonlinear equality constraints, only bound constraints, inequality constraints and linear equality constraints. You can set the `linear_equality_constraints` option to `true` if the equality constraint functions are indeed linear/affine.",
+            ),
+        )
     end
 
     if A !== nothing && norm(A * x0 - b) > options.nt.linear_constraints_atol
