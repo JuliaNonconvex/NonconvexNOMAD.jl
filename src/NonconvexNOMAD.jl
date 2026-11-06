@@ -258,11 +258,11 @@ function optimize!(workspace::NOMADWorkspace)
     end
 
     result = NOMAD.solve(nomad_problem, x0)
-    minimizer = result.x_best_feas
-    if minimizer === nothing
-        return NOMADResult(fill(NaN, length(x0)), NaN, result, alg, options)
-    else
+    if result.feasible && result.x_sol !== nothing
+        minimizer = result.x_sol
         return NOMADResult(minimizer, obj(minimizer), result, alg, options)
+    else
+        return NOMADResult(fill(NaN, length(x0)), NaN, result, alg, options)
     end
 end
 
