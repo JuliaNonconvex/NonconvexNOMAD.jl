@@ -1,6 +1,6 @@
 name = "NonconvexNOMAD"
 uuid = "2385ff6c-83fd-4e6c-afbd-4e7983621e3f"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Mohamed Tarek <mohdibntarek@gmail.com> and contributors"]
 
 [deps]
@@ -13,7 +13,7 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 Krylov = "0.10, 0.11"
-NOMAD = "2.4, 2.5"
+NOMAD = "2.4, 2.5, 3"
 NonconvexCore = "1.5"
 Parameters = "0.12, 0.13"
 Reexport = "1"
