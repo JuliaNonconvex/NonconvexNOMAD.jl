@@ -201,3 +201,13 @@ end
     @test all(s -> isfinite(s.f), iterates)
     @test abs(r.minimum - sqrt(8 / 27)) < 1e-4
 end
+
+@testset "solver capabilities" begin
+    caps = solver_capabilities(NOMADAlg())
+    @test caps isa ConstraintCapabilities
+    @test caps.eq === true
+    @test caps.ineq === true
+    @test caps.sd === false
+    @test caps.box === true
+    @test caps.integer === true
+end

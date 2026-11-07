@@ -15,6 +15,18 @@ struct NOMADAlg <: AbstractOptimizer
 end
 NOMADAlg() = NOMADAlg(:explicit) # :progressive, :custom
 
+# Nonlinear equality constraints are supported only when the
+# `linear_equality_constraints` option is set (validated with a descriptive
+# error in the Workspace constructor); integer variables are supported via
+# NOMAD's granularity/input types.
+NonconvexCore.solver_capabilities(::NOMADAlg) = ConstraintCapabilities(
+    eq = true,
+    ineq = true,
+    sd = false,
+    box = true,
+    integer = true,
+)
+
 struct NOMADOptions{N<:NamedTuple}
     nt::N
 end
