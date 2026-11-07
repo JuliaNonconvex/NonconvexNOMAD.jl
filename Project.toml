@@ -1,6 +1,6 @@
 name = "NonconvexNOMAD"
 uuid = "2385ff6c-83fd-4e6c-afbd-4e7983621e3f"
-version = "0.2.1"
+version = "0.3.0"
 authors = ["Mohamed Tarek <mohdibntarek@gmail.com> and contributors"]
 
 [deps]
