@@ -141,3 +141,43 @@ end
     @test NonconvexNOMAD.finite_or_inf(Inf) == Inf
     @test NonconvexNOMAD.finite_or_inf(1.5) == 1.5
 end
+
+@testset "nomad_result" begin
+    # Both branches of the NOMAD.jl 3.0 result handling: feasible solutions
+    # expose `x_sol`, failed runs return NaN results.
+    alg = NOMADAlg()
+    options = NOMADOptions()
+    m = Model(f)
+    addvar!(m, [0.0, 0.0], [10.0, 10.0])
+    r1 = NonconvexNOMAD.nomad_result(
+        (feasible = true, x_sol = [1.0, 2.0], status = 0),
+        x0,
+        sum,
+        alg,
+        options,
+    )
+    @test r1.minimum == 3.0
+    @test r1.minimizer == [1.0, 2.0]
+    @test r1.result.feasible
+
+    r2 = NonconvexNOMAD.nomad_result(
+        (feasible = false, x_sol = nothing, status = -2),
+        x0,
+        sum,
+        alg,
+        options,
+    )
+    @test isnan(r2.minimum)
+    @test all(isnan, r2.minimizer)
+    @test !r2.result.feasible
+
+    r3 = NonconvexNOMAD.nomad_result(
+        (feasible = true, x_sol = nothing, status = 1),
+        x0,
+        sum,
+        alg,
+        options,
+    )
+    @test isnan(r3.minimum)
+    @test all(isnan, r3.minimizer)
+end

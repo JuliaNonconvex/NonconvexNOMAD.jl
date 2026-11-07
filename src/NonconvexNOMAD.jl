@@ -258,6 +258,13 @@ function optimize!(workspace::NOMADWorkspace)
     end
 
     result = NOMAD.solve(nomad_problem, x0)
+    return nomad_result(result, x0, obj, alg, options)
+end
+
+# NOMAD.jl 3.0 returns a NamedTuple; feasible runs expose `x_sol`, while
+# failed runs only signal infeasibility. Keep the old semantics: NaN result
+# when no feasible minimizer was found.
+function nomad_result(result, x0, obj, alg, options)
     if result.feasible && result.x_sol !== nothing
         minimizer = result.x_sol
         return NOMADResult(minimizer, obj(minimizer), result, alg, options)
