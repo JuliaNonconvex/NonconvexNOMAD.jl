@@ -6,6 +6,7 @@ using Reexport, Parameters, Zygote
 @reexport using NonconvexCore
 using NonconvexCore: VecModel, AbstractResult
 using NonconvexCore: AbstractOptimizer, CountingFunction
+using NonconvexCore: Solution, ConvergenceState, NoCallback
 import NonconvexCore: optimize, optimize!, Workspace
 import NOMAD: NOMAD
 
@@ -51,21 +52,23 @@ function NOMADOptions(;
     )
 end
 
-mutable struct NOMADWorkspace{M<:VecModel,X<:AbstractVector,O<:NOMADOptions,A<:NOMADAlg} <:
+mutable struct NOMADWorkspace{M<:VecModel,X<:AbstractVector,O<:NOMADOptions,A<:NOMADAlg,F<:Function} <:
                Workspace
     model::M
     x0::X
     options::O
     alg::A
+    callback::F
 end
 function NOMADWorkspace(
     model::VecModel,
     optimizer::NOMADAlg,
     x0::AbstractVector = getinit(model);
     options = NOMADOptions(),
+    callback::Function = NoCallback(),
     kwargs...,
 )
-    return NOMADWorkspace(model, copy(x0), options, optimizer)
+    return NOMADWorkspace(model, copy(x0), options, optimizer, callback)
 end
 struct NOMADResult{M1,M2,R,A,O} <: AbstractResult
     minimizer::M1
@@ -80,6 +83,7 @@ function NonconvexCore._optimize_precheck(
     ::NOMADAlg,
     x0;
     options = NOMADOptions(),
+    kwargs...,
 )
     length(model.eq_constraints.fs) == 0 ||
         options.nt.linear_equality_constraints ||
@@ -104,7 +108,7 @@ end
 finite_or_inf(x::T) where {T} = isnan(x) ? convert(T, Inf) : x
 
 function optimize!(workspace::NOMADWorkspace)
-    @unpack model, options, x0, alg = workspace
+    @unpack model, options, x0, alg, callback = workspace
     if options.nt.linear_equality_constraints
         length(model.eq_constraints.fs) > 0 || throw(
             ArgumentError(
@@ -186,6 +190,7 @@ function optimize!(workspace::NOMADWorkspace)
                 else
                     out = [finite_or_inf(obj(x))]
                 end
+                callback(nomad_solution(x, out[1]))
                 return (true, true, out)
             catch err
                 if !(err isa DomainError)
@@ -275,6 +280,27 @@ end
 
 function Workspace(model::VecModel, optimizer::NOMADAlg, args...; kwargs...)
     return NOMADWorkspace(model, optimizer, args...; kwargs...)
+end
+
+"""
+    nomad_solution(x, f)
+
+Builds the `Solution` passed to the Nonconvex `callback` from a blackbox
+evaluation of NOMAD at `x` with objective value `f`.
+"""
+function nomad_solution(x::AbstractVector, f::Real)
+    convstate = ConvergenceState{Float64}()
+    return Solution(
+        copy(x),
+        copy(x),
+        Float64[],
+        f,
+        f,
+        zeros(length(x)),
+        Float64[],
+        zeros(0, length(x)),
+        convstate,
+    )
 end
 
 end

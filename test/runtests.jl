@@ -181,3 +181,23 @@ end
     @test isnan(r3.minimum)
     @test all(isnan, r3.minimizer)
 end
+
+@testset "Iteration callback" begin
+    options = NOMADOptions()
+    m = Model(f)
+    addvar!(m, [0.0, 0.0], [10.0, 10.0])
+    add_ineq_constraint!(m, x -> g(x, 2, 0), flags = [:explicit])
+    add_ineq_constraint!(m, x -> g(x, -1, 1), flags = [:progressive])
+
+    iterates = Any[]
+    r = NonconvexNOMAD.optimize(
+        m,
+        NOMADAlg(:explicit),
+        x0,
+        options = options,
+        callback = s -> push!(iterates, (x = copy(s.x), f = s.f)),
+    )
+    @test length(iterates) > 0
+    @test all(s -> isfinite(s.f), iterates)
+    @test abs(r.minimum - sqrt(8 / 27)) < 1e-4
+end
