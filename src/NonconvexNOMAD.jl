@@ -25,6 +25,7 @@ NonconvexCore.solver_capabilities(::NOMADAlg) = ConstraintCapabilities(
     sd = false,
     box = true,
     integer = true,
+        infinite_bounds = true,
 )
 
 struct NOMADOptions{N<:NamedTuple}

@@ -210,4 +210,5 @@ end
     @test caps.sd === false
     @test caps.box === true
     @test caps.integer === true
+    @test caps.infinite_bounds === true
 end
