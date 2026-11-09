@@ -1,0 +1,11 @@
+name = "NOMAD"
+modules = ["NonconvexNOMAD"]
+doctest_setup = "using NonconvexNOMAD"
+
+[[pages]]
+title = "NOMAD"
+file = "index.md"
+
+[[pages]]
+title = "Docstrings"
+file = "docstrings.md"

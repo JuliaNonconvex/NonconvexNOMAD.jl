@@ -1,0 +1,4 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DocumenterFragments = "862d714e-9826-4bb1-afc7-f2d363bba08c"
+NonconvexNOMAD = "2385ff6c-83fd-4e6c-afbd-4e7983621e3f"
