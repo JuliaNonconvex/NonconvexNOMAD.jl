@@ -12,6 +12,8 @@ Reexport = "189a3867-3050-52da-a836-e630ba90ab69"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+Aqua = "0.8"
+JET = "0.9, 0.10, 0.11, 0.12, 0.13"
 Krylov = "0.10, 0.11"
 NOMAD = "2.4, 2.5, 3"
 NonconvexCore = "1.5"
@@ -21,8 +23,10 @@ Zygote = "0.6"
 julia = "1.10"
 
 [extras]
+Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
+JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["LinearAlgebra", "Test"]
+test = ["LinearAlgebra", "Test", "Aqua", "JET"]
