@@ -1,4 +1,4 @@
-using Aqua, NonconvexNOMAD
-
-# All Aqua quality gates are enabled. No tests are skipped.
-Aqua.test_all(NonconvexNOMAD)
+@testitem "Aqua" begin
+    using Aqua, NonconvexNOMAD
+    Aqua.test_all(NonconvexNOMAD)
+end

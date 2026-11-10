@@ -84,7 +84,7 @@ end
 function NOMADWorkspace(
     model::VecModel,
     optimizer::NOMADAlg,
-    x0::AbstractVector=getinit(model);
+    x0::AbstractVector=NonconvexCore.getinit(model);
     options=NOMADOptions(),
     callback::Function=NoCallback(),
     kwargs...,
@@ -196,6 +196,7 @@ function optimize!(workspace::NOMADWorkspace)
     output_types = [["OBJ"]; ineqT]
 
     obj = getobjective(model)
+    obj === nothing && throw(ArgumentError("The model has no objective function."))
     obj(x0)
     model.ineq_constraints(x0)
 

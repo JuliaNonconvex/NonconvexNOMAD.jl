@@ -1,4 +1,4 @@
-using JET, NonconvexNOMAD
-
-# Run JET analysis on the package.
-JET.test_package(NonconvexNOMAD; target_modules=(NonconvexNOMAD,))
+@testitem "JET" begin
+    using JET, NonconvexNOMAD
+    JET.test_package(NonconvexNOMAD; target_modules=(NonconvexNOMAD,))
+end
