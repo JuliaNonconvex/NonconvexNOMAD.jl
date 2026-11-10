@@ -1,5 +1,7 @@
 # NonconvexNOMAD
 
+[![Documentation (stable)](https://img.shields.io/badge/docs-stable-blue.svg)](https://julianonconvex.github.io/NonconvexNOMAD.jl/stable)
+[![Documentation (dev)](https://img.shields.io/badge/docs-dev-blue.svg)](https://julianonconvex.github.io/NonconvexNOMAD.jl/dev)
 [![Build Status](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaNonconvex/NonconvexNOMAD.jl/actions)
 [![Coverage](https://codecov.io/gh/JuliaNonconvex/NonconvexNOMAD.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/JuliaNonconvex/NonconvexNOMAD.jl)
 [![Aqua QA](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
