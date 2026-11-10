@@ -19,14 +19,21 @@ NOMADAlg() = NOMADAlg(:explicit) # :progressive, :custom
 # `linear_equality_constraints` option is set (validated with a descriptive
 # error in the Workspace constructor); integer variables are supported via
 # NOMAD's granularity/input types.
-NonconvexCore.solver_capabilities(::NOMADAlg) = ConstraintCapabilities(
-    eq = true,
-    ineq = true,
-    sd = false,
-    box = true,
-    integer = true,
-        infinite_bounds = true,
-)
+function NonconvexCore.solver_capabilities(::NOMADAlg)
+    return ConstraintCapabilities(;
+        linear_eq=true,
+        nonlinear_eq=false,  # only with the linear_equality_constraints option
+        linear_ineq=true,
+        nonlinear_ineq=true,
+        linear_sd=false,
+        nonlinear_sd=false,
+        box=true,
+        continuous=true,
+        binary=true,
+        integer=true,
+        infinite_bounds=true,
+    )
+end
 
 struct NOMADOptions{N<:NamedTuple}
     nt::N
@@ -40,13 +47,13 @@ nm_search_stop_on_success::Bool=false, max_time::Union{Nothing,Int}=nothing,
 linear_converter::String=SVD
 =#
 function NOMADOptions(;
-    linear_equality_constraints = false,
-    min_mesh_size = 0.0,
-    initial_mesh_size = Float64[],
-    granularity = 0.0,
-    display_stats = ["OBJ", "CONS_H", "BBE", "TIME"],
-    extra_display_stats = String[],
-    linear_constraints_atol = 1e-6,
+    linear_equality_constraints=false,
+    min_mesh_size=0.0,
+    initial_mesh_size=Float64[],
+    granularity=0.0,
+    display_stats=["OBJ", "CONS_H", "BBE", "TIME"],
+    extra_display_stats=String[],
+    linear_constraints_atol=1e-6,
     kwargs...,
 )
     display_stats = unique(vcat(display_stats, extra_display_stats))
@@ -65,8 +72,9 @@ function NOMADOptions(;
     )
 end
 
-mutable struct NOMADWorkspace{M<:VecModel,X<:AbstractVector,O<:NOMADOptions,A<:NOMADAlg,F<:Function} <:
-               Workspace
+mutable struct NOMADWorkspace{
+    M<:VecModel,X<:AbstractVector,O<:NOMADOptions,A<:NOMADAlg,F<:Function
+} <: Workspace
     model::M
     x0::X
     options::O
@@ -76,9 +84,9 @@ end
 function NOMADWorkspace(
     model::VecModel,
     optimizer::NOMADAlg,
-    x0::AbstractVector = getinit(model);
-    options = NOMADOptions(),
-    callback::Function = NoCallback(),
+    x0::AbstractVector=getinit(model);
+    options=NOMADOptions(),
+    callback::Function=NoCallback(),
     kwargs...,
 )
     return NOMADWorkspace(model, copy(x0), options, optimizer, callback)
@@ -92,11 +100,7 @@ struct NOMADResult{M1,M2,R,A,O} <: AbstractResult
 end
 
 function NonconvexCore._optimize_precheck(
-    model::NonconvexCore.AbstractModel,
-    ::NOMADAlg,
-    x0;
-    options = NOMADOptions(),
-    kwargs...,
+    model::NonconvexCore.AbstractModel, ::NOMADAlg, x0; options=NOMADOptions(), kwargs...
 )
     length(model.eq_constraints.fs) == 0 ||
         options.nt.linear_equality_constraints ||
@@ -110,7 +114,7 @@ function NonconvexCore._optimize_precheck(
             "NOMAD does not support semidefinite constraints, only bound constraints, inequality constraints and linear equality constraints.",
         ),
     )
-    return
+    return nothing
 end
 
 @generated function drop_ks(nt::NamedTuple{names}, ::Val{ks}) where {names,ks}
@@ -143,14 +147,14 @@ function optimize!(workspace::NOMADWorkspace)
     if A !== nothing && norm(A * x0 - b) > options.nt.linear_constraints_atol
         throw(
             ArgumentError(
-                "The initial solution doesn't satisfy the linear equality constraints.",
+                "The initial solution doesn't satisfy the linear equality constraints."
             ),
         )
     end
     if length(model.ineq_constraints.fs) > 0 && any(>(0), model.ineq_constraints(x0))
         throw(
             ArgumentError(
-                "The initial solution doesn't satisfy the inequality constraints.",
+                "The initial solution doesn't satisfy the inequality constraints."
             ),
         )
     end
@@ -264,10 +268,7 @@ function optimize!(workspace::NOMADWorkspace)
     nomad_options = drop_ks(
         options.nt,
         Val((
-            :linear_equality_constraints,
-            :min_mesh_size,
-            :initial_mesh_size,
-            :granularity,
+            :linear_equality_constraints, :min_mesh_size, :initial_mesh_size, :granularity
         )),
     )
 
