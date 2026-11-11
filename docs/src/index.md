@@ -1,6 +1,12 @@
 # Nonlinear optimization with the MADS (NOMAD) algorithm for continuous and discrete, constrained optimization
 
-![JuliaNonconvex logo](https://raw.githubusercontent.com/JuliaNonconvex/NonconvexNOMAD.jl/main/docs/src/assets/logo.png)
+```@raw html
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JuliaNonconvex/NonconvexNOMAD.jl/main/docs/src/assets/logo.png" alt="JuliaNonconvex logo" width="180"/>
+</p>
+```
+
+
 
 ## Description
 
