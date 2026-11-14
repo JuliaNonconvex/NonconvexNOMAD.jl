@@ -101,7 +101,7 @@ Checks that the per-variable mesh-size options (`min_mesh_size`,
 input variable. NOMAD.jl only detects length mismatches deep inside its
 problem constructor with an unhelpful assertion, so they are validated up
 front here with an informative error. Scalar values are broadcast to all
-variables in [`optimize!`](@ref); an empty `initial_mesh_size` vector is
+variables in `optimize!`; an empty `initial_mesh_size` vector is
 valid because NOMAD.jl derives a default initial mesh size from the
 granularity.
 """
