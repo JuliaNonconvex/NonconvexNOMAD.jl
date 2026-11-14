@@ -17,8 +17,8 @@ NOMADAlg() = NOMADAlg(:explicit) # :progressive, :custom
 
 # Nonlinear equality constraints are supported only when the
 # `linear_equality_constraints` option is set (validated with a descriptive
-# error in the Workspace constructor); integer variables are supported via
-# NOMAD's granularity/input types.
+# error by `_optimize_precheck`); integer variables are supported via NOMAD's
+# granularity/input types.
 function NonconvexCore.solver_capabilities(::NOMADAlg)
     return ConstraintCapabilities(;
         linear_eq=true,
@@ -89,7 +89,35 @@ function NOMADWorkspace(
     callback::Function=NoCallback(),
     kwargs...,
 )
+    validate_mesh_size_options(options, length(x0))
     return NOMADWorkspace(model, copy(x0), options, optimizer, callback)
+end
+
+"""
+    validate_mesh_size_options(options, nb_inputs)
+
+Checks that the per-variable mesh-size options (`min_mesh_size`,
+`initial_mesh_size` and `granularity`) passed as vectors have one entry per
+input variable. NOMAD.jl only detects length mismatches deep inside its
+problem constructor with an unhelpful assertion, so they are validated up
+front here with an informative error. Scalar values are broadcast to all
+variables in `optimize!`; an empty `initial_mesh_size` vector is
+valid because NOMAD.jl derives a default initial mesh size from the
+granularity.
+"""
+function validate_mesh_size_options(options::NOMADOptions, nb_inputs::Integer)
+    for name in (:min_mesh_size, :initial_mesh_size, :granularity)
+        val = getproperty(options.nt, name)
+        if val isa AbstractVector
+            name === :initial_mesh_size && isempty(val) && continue
+            length(val) == nb_inputs || throw(
+                ArgumentError(
+                    "The `$(name)` option is a vector of length $(length(val)) but the model has $(nb_inputs) input variables. Pass a vector with one value per variable, or a scalar value to use it for all variables.",
+                ),
+            )
+        end
+    end
+    return nothing
 end
 struct NOMADResult{M1,M2,R,A,O} <: AbstractResult
     minimizer::M1
@@ -126,15 +154,12 @@ finite_or_inf(x::T) where {T} = isnan(x) ? convert(T, Inf) : x
 
 function optimize!(workspace::NOMADWorkspace)
     @unpack model, options, x0, alg, callback = workspace
-    if options.nt.linear_equality_constraints
-        length(model.eq_constraints.fs) > 0 || throw(
-            ArgumentError(
-                "The `linear_equality_constraints` option is true but the model has no equality constraints.",
-            ),
-        )
+    if options.nt.linear_equality_constraints && length(model.eq_constraints.fs) > 0
         A = Zygote.jacobian(model.eq_constraints, x0)[1]
         b = -model.eq_constraints(zeros(length(x0)))
     else
+        # `linear_equality_constraints = true` on a model without equality
+        # constraints is a harmless no-op and is accepted.
         A = nothing
         b = nothing
         length(model.eq_constraints.fs) == 0 || throw(

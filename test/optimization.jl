@@ -123,13 +123,55 @@ end
     add_eq_constraint!(m, x -> sum(x) - 1 / 3 - 8 / 27)
     @test_throws ArgumentError NonconvexNOMAD.optimize(m, NOMADAlg(), x0)
 
-    # linear_equality_constraints = true without equality constraints gives a
-    # descriptive error, not an AssertionError.
+    # linear_equality_constraints = true on a model without equality
+    # constraints is a harmless no-op and must be accepted, not rejected.
     m2 = Model(f)
     addvar!(m2, [0.0, 0.0], [10.0, 10.0])
-    @test_throws ArgumentError NonconvexNOMAD.optimize(
+    r = NonconvexNOMAD.optimize(
         m2, NOMADAlg(), x0, options=NOMADOptions(linear_equality_constraints=true)
     )
+    @test isfinite(r.minimum)
+    @test 0.0 <= r.minimum <= sqrt(2.3)
+end
+
+@testitem "Mesh-size option validation" begin
+    using NonconvexNOMAD, LinearAlgebra, Test
+
+    # Regression test: NOMAD.jl used to detect per-variable mesh-size option
+    # length mismatches only deep inside its problem constructor with an
+    # unhelpful assertion. The workspace constructor must validate the
+    # lengths up front with an informative ArgumentError.
+    f(x::AbstractVector) = sqrt(x[2])
+    m = Model(f)
+    addvar!(m, [0.0, 0.0], [10.0, 10.0])
+    vm, vx0, _ = NonconvexCore.tovecmodel(m, [0.5, 2.3])
+
+    for (name, bad_value) in
+        [(:min_mesh_size, [1e-4]), (:initial_mesh_size, [1.0]), (:granularity, [1.0])]
+        options = NOMADOptions(; (name => bad_value,)...)
+        err = try
+            Workspace(vm, NOMADAlg(), vx0; options=options)
+            nothing
+        catch e
+            e
+        end
+        @test err isa ArgumentError
+        @test occursin(string(name), err.msg)
+        @test occursin("length 1", err.msg)
+        @test occursin("2 input variables", err.msg)
+    end
+
+    # Scalar values and correctly sized vectors are still accepted.
+    for options in [
+        NOMADOptions(
+            min_mesh_size=[1e-4, 1e-4], initial_mesh_size=[1.0, 1.0], granularity=[0.0, 0.0]
+        ),
+        NOMADOptions(min_mesh_size=1e-4, initial_mesh_size=1.0, granularity=0.0),
+        NOMADOptions(),  # initial_mesh_size defaults to the empty vector (NOMAD default)
+    ]
+        @test Workspace(vm, NOMADAlg(), vx0; options=options) isa
+            NonconvexNOMAD.NOMADWorkspace
+    end
 end
 
 @testitem "finite_or_inf" begin
