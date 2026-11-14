@@ -10,6 +10,18 @@ using NonconvexCore: Solution, ConvergenceState, NoCallback
 import NonconvexCore: optimize, optimize!, Workspace
 import NOMAD: NOMAD
 
+"""
+    NOMADAlg(type::Symbol = :explicit)
+
+The [NOMAD](https://www.gerad.ca/nomad/) (Nonlinear Optimization with the
+MADS algorithm) blackbox optimizer wrapped through
+[NOMAD.jl](https://github.com/bbopt/NOMAD.jl) for the Nonconvex interface.
+
+`type` selects the NOMAD variant: `:explicit` (default), `:progressive`, or
+`:custom`. NOMAD is derivative-free and supports nonlinear inequality
+constraints; nonlinear equality constraints are supported only when the
+`linear_equality_constraints` option is set. See [`NOMADOptions`](@ref).
+"""
 struct NOMADAlg <: AbstractOptimizer
     type::Symbol
 end
@@ -35,6 +47,26 @@ function NonconvexCore.solver_capabilities(::NOMADAlg)
     )
 end
 
+"""
+    NOMADOptions(; linear_equality_constraints=false, min_mesh_size=0.0,
+                 initial_mesh_size=Float64[], granularity=0.0,
+                 display_stats=["OBJ", "CONS_H", "BBE", "TIME"],
+                 extra_display_stats=String[], linear_constraints_atol=1e-6,
+                 kwargs...)
+
+Options for [`NOMADAlg`](@ref), passed to `optimize` as `options = ...`.
+
+- `linear_equality_constraints`: enable nonlinear equality constraint
+  handling (NOMAD requires them to be declared linear).
+- `min_mesh_size`, `initial_mesh_size`, `granularity`: mesh and granularity
+  settings for the MADS poll.
+- `display_stats`/`extra_display_stats`: statistics shown in the output.
+- `linear_constraints_atol`: tolerance on linear constraints.
+
+All remaining keyword arguments are forwarded to NOMAD, including
+`max_bb_eval`, `quad_model_search`, `nm_search`, `max_time`, etc.; see the
+[NOMAD parameters documentation](https://nomad-4-user-guide.readthedocs.io/en/latest/).
+"""
 struct NOMADOptions{N<:NamedTuple}
     nt::N
 end
