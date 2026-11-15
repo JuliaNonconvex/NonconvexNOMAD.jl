@@ -1,5 +1,10 @@
 # NEWS
 
+## 0.4.3
+
+- Added docstrings for `NOMADAlg` and `NOMADOptions` (REPL help and API reference).
+
+
 ## 0.4.2
 
 - Validated the NOMAD mesh-size options and made the equality-constraint
