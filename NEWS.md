@@ -1,5 +1,11 @@
 # NEWS
 
+## 0.4.4
+
+- The linear-equality matrix is formed with `NonconvexCore.value_jacobian`
+  (JuMP-converted models get the exact evaluator Jacobian); the direct
+  Zygote dependency is dropped.
+
 ## 0.4.3
 
 - Added docstrings for `NOMADAlg` and `NOMADOptions` (REPL help and API reference).
