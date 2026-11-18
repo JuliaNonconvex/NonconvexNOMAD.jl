@@ -2,9 +2,10 @@ module NonconvexNOMAD
 
 export NOMADAlg, NOMADOptions
 
-using Reexport, Parameters, Zygote
+using Reexport, Parameters
 @reexport using NonconvexCore
 using NonconvexCore: VecModel, AbstractResult
+using NonconvexCore: value_jacobian
 using NonconvexCore: AbstractOptimizer, CountingFunction
 using NonconvexCore: Solution, ConvergenceState, NoCallback
 import NonconvexCore: optimize, optimize!, Workspace
@@ -187,7 +188,7 @@ finite_or_inf(x::T) where {T} = isnan(x) ? convert(T, Inf) : x
 function optimize!(workspace::NOMADWorkspace)
     @unpack model, options, x0, alg, callback = workspace
     if options.nt.linear_equality_constraints && length(model.eq_constraints.fs) > 0
-        A = Zygote.jacobian(model.eq_constraints, x0)[1]
+        A = value_jacobian(model.eq_constraints, x0)[2]
         b = -model.eq_constraints(zeros(length(x0)))
     else
         # `linear_equality_constraints = true` on a model without equality
