@@ -1,5 +1,8 @@
 # NEWS
 
+## 0.4.5
+
+- Docs: package-name section titles and left-aligned logos (no code changes).
 ## 0.4.4
 
 - The linear-equality matrix is formed with `NonconvexCore.value_jacobian`
