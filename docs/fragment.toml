@@ -1,4 +1,4 @@
-name = "NOMAD"
+name = "NonconvexNOMAD"
 modules = ["NonconvexNOMAD"]
 doctest_setup = "using NonconvexNOMAD"
 
