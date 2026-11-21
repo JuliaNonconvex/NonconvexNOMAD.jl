@@ -1,4 +1,4 @@
-# Nonlinear optimization with the MADS (NOMAD) algorithm for continuous and discrete, constrained optimization
+# NonconvexNOMAD
 
 ![JuliaNonconvex logo](https://raw.githubusercontent.com/JuliaNonconvex/NonconvexNOMAD.jl/main/docs/src/assets/logo.png)
 
